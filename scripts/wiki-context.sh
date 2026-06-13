@@ -37,6 +37,9 @@ if [ "$mode" = "session" ]; then
 fi
 
 # ---- prompt モード（UserPromptSubmit） ----
+# 新しいユーザーメッセージ = reflect マーカーをリセット（ループ防止）
+rm -f "${TMPDIR:-/tmp}/llm-wiki-reflected"
+
 # config で auto_reference: false なら無効
 if grep -qE '^auto_reference:[[:space:]]*false' "$root/config.yml" 2>/dev/null; then
   exit 0
