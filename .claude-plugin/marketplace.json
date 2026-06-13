@@ -16,7 +16,7 @@
         "email": "okayado7038@gmail.com",
         "url": "https://github.com/roamer7038"
       },
-      "source": ".",
+      "source": "./",
       "category": "knowledge",
       "homepage": "https://github.com/roamer7038/llm-wiki-plugin",
       "keywords": ["knowledge-base", "wiki", "notes", "memory"]
