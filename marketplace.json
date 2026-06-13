@@ -1,0 +1,25 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "llm-wiki",
+  "description": "LLMが構築・維持・参照する永続的なグラフ構造ナレッジベース",
+  "owner": {
+    "name": "roamer7038",
+    "email": "okayado7038@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "llm-wiki",
+      "displayName": "LLM Wiki",
+      "description": "LLMが構築・維持・参照する、永続的・累積的なナレッジベース。RAGと違い、取り込みのたびに知識をWikiに統合・圧縮して保持する。",
+      "author": {
+        "name": "roamer7038",
+        "email": "okayado7038@gmail.com",
+        "url": "https://github.com/roamer7038"
+      },
+      "source": ".",
+      "category": "knowledge",
+      "homepage": "https://github.com/roamer7038/llm-wiki-plugin",
+      "keywords": ["knowledge-base", "wiki", "notes", "memory"]
+    }
+  ]
+}
