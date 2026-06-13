@@ -24,18 +24,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-reflect.sh",
-            "timeout": 10
-          }
-        ]
-      }
     ]
   }
 }
