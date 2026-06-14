@@ -166,7 +166,7 @@ bash scripts/wiki-validate.sh   # 健全性チェック（常に exit 0）
 
 設計の核心は **決定論スクリプトと LLM 判断の分業**。間違えてはいけない定型操作は `scripts/` に固定し、LLM には要約・統合・分類・矛盾検出のみを委ねる。新機能も基本はこの境界を守り、`scripts/` への追加と対応スキルの更新という形を取る。
 
-開発の詳細な規約・アーキテクチャ・変更方針（オンディスク形式を変えるときの移行の仕掛けなど）は [`CLAUDE.md`](CLAUDE.md) を参照。機能変更時は `.claude-plugin/plugin.json` の `version` を更新し、`plugin.json` と `marketplace.json` で重複している説明文を揃えること。
+動作アーキテクチャ（自動／手動の境界・整理機構・蓄積ライフサイクル・人間による直接編集の運用）は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) を参照。開発の詳細な規約・変更方針（オンディスク形式を変えるときの移行の仕掛けなど）は [`CLAUDE.md`](CLAUDE.md) を参照。機能変更時は `.claude-plugin/plugin.json` の `version` を更新し、`plugin.json` と `marketplace.json` で重複している説明文を揃えること。
 
 ## ライセンス
 

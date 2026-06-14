@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 これは Claude Code プラグイン `llm-wiki` の**ソースリポジトリ**である。プラグインが操作する Wiki データ本体（`~/.llm-wiki/`）はここには含まれない。両者を混同しないこと。
 
+動作アーキテクチャの全体像（4層構成・自動/手動の境界・整理機構・蓄積ライフサイクル・人間による直接編集の運用）は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) にまとめてある。
+
 ## 2つの世界を分けて考える
 
 | | プラグインリポジトリ（ここ） | Wiki データ |
@@ -79,7 +81,7 @@ bash scripts/wiki-validate.sh        # 健全性チェック（常に exit 0）
 
 ## 既知の状態
 
-- `scripts/wiki-reflect.sh` は**孤立ファイル**。以前の Stop フック用だがフックは削除済み（hooks.json から参照されていない。毎回発火が不快なため除去された経緯）。新たな Stop フックを足す意図がない限り触らない／復活させない。
+- かつて Stop フックで「取り込み提案（Proactive Capture）」を促していたが、毎回発火が不快なため Stop フック・`scripts/wiki-reflect.sh` ともに削除済み。現在は **SessionStart 注入文に Proactive Capture の判定基準を含める**方式（`wiki-context.sh` session モード）に統一している。Stop フックを安易に復活させない（同じ「毎回発火」問題を再発させる）。
 
 ## バージョン同期
 

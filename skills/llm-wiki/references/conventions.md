@@ -68,6 +68,14 @@
 - `auto_reference: false` で UserPromptSubmit による自動参照リマインドを無効化できる。
 - config と実ディレクトリの乖離は `wiki-validate.sh` が検出する。
 
+## 人間による直接編集
+
+LLM だけでなく人間が直接 Wiki を編集してよい。ただし **層で権限を分ける**:
+
+- **コンテンツ層（ページ本文・frontmatter のメタ）** — 人間が自由に編集してよい。ただの Markdown で整合に影響しない。新規ページを手で置く場合は `wiki/<種別>/` 配下に置き、frontmatter 必須項目を埋め、slug は `wiki-slug.sh "<title>"` で生成する。
+- **簿記層（index.md / log.md / リンク `[[..]]` / slug / 移動・改名）** — スクリプト経由が原則。手で触ると参照グラフが壊れる。特に移動・改名は手で `mv` せず必ず `wiki-move.sh`。
+- 人間が編集した後は **`/wiki-lint`（`wiki-validate.sh`）で整合を回復（reconcile）** する。index 未掲載・孤立・リンク切れ・frontmatter 欠落が検出されるので、LLM がスクリプト経由で修復する。
+
 ## 並行・原子性
 
 - 単一グローバル Wiki を複数セッションが触りうるため、log/index/move の書き込みは `wiki.lock` による flock で直列化される（write 系スクリプトが内部で処理）。

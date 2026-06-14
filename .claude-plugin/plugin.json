@@ -1,6 +1,6 @@
 {
   "name": "llm-wiki",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "LLMが構築・維持・参照する永続的なグラフ構造ナレッジベース",
   "author": { "name": "roamer7038", "email": "okayado7038@gmail.com" },
   "keywords": ["knowledge-base", "wiki", "notes", "memory"],

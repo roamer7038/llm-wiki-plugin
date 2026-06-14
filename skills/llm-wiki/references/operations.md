@@ -7,7 +7,8 @@
 目的: 1 ソースを取り込み、要約ページ＋関連ページ更新＋index/log を維持する。
 
 1. **取得と保存**
-   - URL は WebFetch、ローカルは Read で取得。原典を `<scope>/raw/` に保存（不変）。
+   - URL は WebFetch、ローカルは Read で取得。
+   - **取得元を一意特定できるメタ情報**（URL・取得日・`source_id`、ローカルならパスと hash）を `<scope>/raw/`（例 `raw/sources.md`）に記録する。原典そのものの全文保存は任意（著作権・サイズの都合で省略してよい）。保存する場合は不変（読むだけ）に扱う。
    - `source_id` を決める: URL は正規化（クエリ除去等）、ファイルは `sha1sum` 等の hash。
 2. **重複検出**
    - `wiki-search.sh "<title>"` および `wiki-search.sh "<source_id>"` で既存を確認。
@@ -44,9 +45,19 @@
    - **陳腐化**: 新ソースに更新された古い記述。
    - **孤立**: inbound 0 のページに適切なリンクを追加すべきか。
    - **不足概念**: index に頻出するが専用ページが無い概念。
+   - **未 entity 化**: 複数ページに頻出する固有名詞（人物・組織・プロダクト・手法）で `entities` ページが無いもの。entity を作って各ページからリンクすると、スコープ内に閉じがちなリンクをグラフとして繋げられる（特に papers/concepts に偏り entities が空のときに有効）。
    - **データギャップ**: Web 検索で埋められる欠落。具体的な検索クエリを提案。
    - **次の問い**: 深掘りすべき調査テーマを提案。
 3. 修正の適用は**ユーザ確認後**。適用したら index/log をスクリプトで更新。
+
+### 人間の手編集後の reconcile
+
+人間が直接ページを加筆・新規作成・削除・改名した後は lint がドリフトを検出する。スクリプト経由で回復する:
+
+- **index 未掲載 / 要約が古い** → `wiki-index-upsert.sh <scope> <page_type> <slug> "<要約>" "<kw>"` で追加・更新。
+- **リンク切れ（手で mv/rename した）** → 本来の移動を `wiki-move.sh <from-ref> <to-ref>` で行い直す（既に手で動かして実体が移動済みなら、index/リンクの不整合を個別に upsert・修正してから validate を通す）。
+- **frontmatter 欠落** → 必須項目（title/page_type/scope/created/updated）を補う。
+- 回復後は再度 `wiki-validate.sh` を通し、ERROR が消えたことを確認する。
 
 ## Move / Rename / 再編
 

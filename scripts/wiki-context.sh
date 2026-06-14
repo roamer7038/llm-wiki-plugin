@@ -31,15 +31,13 @@ if [ "$mode" = "session" ]; then
 トピック: $topics
 ページ種別: $ptypes
 知識・事実・調査を要する質問に答える前に、該当スコープの index.md（例: $root/global/index.md）を Read し、関連ページを辿ってから出典付きで回答すること。
+このセッションで、Web 調査による新たな知見・複雑な問題の根本原因と解決策・複数ソースを合成した再利用価値ある結論が得られたら、回答末尾で wiki-ingest による取り込みを一言提案すること（既存知識・一時的なデバッグ・単純な編集では提案しない。同一セッションで繰り返さない）。
 取り込み・整理・lint・移動などの操作は llm-wiki スキルの手順に従う。"
   emit "SessionStart" "$ctx"
   exit 0
 fi
 
 # ---- prompt モード（UserPromptSubmit） ----
-# 新しいユーザーメッセージ = reflect マーカーをリセット（ループ防止）
-rm -f "${TMPDIR:-/tmp}/llm-wiki-reflected"
-
 # config で auto_reference: false なら無効
 if grep -qE '^auto_reference:[[:space:]]*false' "$root/config.yml" 2>/dev/null; then
   exit 0
@@ -50,9 +48,9 @@ prompt="$(printf '%s' "$input" | jq -r '.prompt // .user_prompt // empty' 2>/dev
 [ -n "$prompt" ] || exit 0
 
 # 照合キーワード: 各 index.md の kw: 行のみ（軽量・上限）＋ トピック名
-kws="$(grep -rhoE 'kw:.*$' "$root"/global/index.md "$root"/topics/*/index.md 2>/dev/null \
+kws="$(grep -arhoE 'kw:.*$' "$root"/global/index.md "$root"/topics/*/index.md 2>/dev/null \
         | sed 's/^kw://' | tr ',、' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-        | grep -v '^$' | sort -u || true)"
+        | grep -av '^$' | sort -u || true)"
 topic_names="$(list_dirs "$root/topics" || true)"
 
 matched=0
