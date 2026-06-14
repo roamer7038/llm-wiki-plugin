@@ -1,6 +1,6 @@
 # LLM Wiki Plugin アーキテクチャ
 
-LLM Wiki Plugin が「どうやって知識を蓄積・参照・整理するか」を、自動で行われる部分・手動が必要な部分・整理機構の思想とともに記述する。開発の規約・変更方針は [`../CLAUDE.md`](../CLAUDE.md) を、利用者向けの導入は [`../README.md`](../README.md) を参照。
+LLM Wiki Plugin が「どうやって知識を蓄積・参照・整理するか」を、自動で行われる部分・手動が必要な部分・整理機構の思想とともに記述する。**Claude Code ランタイムとの接合面（イベント・注入文・実行タイミング）の厳密仕様**は [`CLAUDE_CODE_INTEGRATION.md`](CLAUDE_CODE_INTEGRATION.md) に分離した。開発の規約・変更方針は [`../CLAUDE.md`](../CLAUDE.md) を、利用者向けの導入は [`../README.md`](../README.md) を参照。
 
 ---
 

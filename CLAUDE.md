@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 これは Claude Code プラグイン `llm-wiki` の**ソースリポジトリ**である。プラグインが操作する Wiki データ本体（`~/.llm-wiki/`）はここには含まれない。両者を混同しないこと。
 
-動作アーキテクチャの全体像（4層構成・自動/手動の境界・整理機構・蓄積ライフサイクル・人間による直接編集の運用）は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) にまとめてある。
+動作アーキテクチャの全体像（4層構成・自動/手動の境界・整理機構・蓄積ライフサイクル・人間による直接編集の運用）は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) にまとめてある。Claude Code ランタイムとの接合面（フックの注入文・タイミング・やっていないこと）の厳密仕様は [`docs/CLAUDE_CODE_INTEGRATION.md`](docs/CLAUDE_CODE_INTEGRATION.md) を参照。
 
 ## 2つの世界を分けて考える
 
@@ -81,7 +81,7 @@ bash scripts/wiki-validate.sh        # 健全性チェック（常に exit 0）
 
 ## 既知の状態
 
-- かつて Stop フックで「取り込み提案（Proactive Capture）」を促していたが、毎回発火が不快なため Stop フック・`scripts/wiki-reflect.sh` ともに削除済み。現在は **SessionStart 注入文に Proactive Capture の判定基準を含める**方式（`wiki-context.sh` session モード）に統一している。Stop フックを安易に復活させない（同じ「毎回発火」問題を再発させる）。
+- **Proactive Capture（取り込み提案）は SessionStart 注入文に判定基準を畳み込む方式**（`wiki-context.sh` session モード）で実現する。Stop フックでは実装しない — 毎ターン発火してノイズになるため。
 
 ## バージョン同期
 
