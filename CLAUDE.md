@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 これは Claude Code プラグイン `llm-wiki` の**ソースリポジトリ**である。プラグインが操作する Wiki データ本体（`~/.llm-wiki/`）はここには含まれない。両者を混同しないこと。
 
-動作アーキテクチャの全体像（4層構成・自動/手動の境界・整理機構・蓄積ライフサイクル・人間による直接編集の運用）は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) にまとめてある。Claude Code ランタイムとの接合面（フックの注入文・タイミング・やっていないこと）の厳密仕様は [`docs/CLAUDE_CODE_INTEGRATION.md`](docs/CLAUDE_CODE_INTEGRATION.md) を参照。
+動作アーキテクチャの全体像（5層構成・自動/手動の境界・整理機構・蓄積ライフサイクル・人間による直接編集の運用）は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) にまとめてある。Claude Code ランタイムとの接合面（フックの注入文・タイミング・やっていないこと）の厳密仕様は [`docs/CLAUDE_CODE_INTEGRATION.md`](docs/CLAUDE_CODE_INTEGRATION.md) を参照。
 
 ## 2つの世界を分けて考える
 
@@ -35,14 +35,15 @@ bash scripts/wiki-validate.sh        # 健全性チェック（常に exit 0）
 
 **決定論スクリプトと LLM 判断の分業がこの設計の根幹。** 構造生成・index/log 追記・リンク書換え・移動・slug 生成といった「間違えてはいけない定型操作」は `scripts/` に固定し、LLM には要約・統合・分類・矛盾検出という「判断を要する作業」のみを委ねる。新機能を足すときもこの境界を守る — 定型操作はスクリプトへ、判断はスキルの手順へ。
 
-### 3層構成
+### 4層構成
 
 1. **`scripts/*.sh`** — 全操作の実体。すべて `_lib.sh` を source する。
    - read 系: `wiki-path` / `wiki-search` / `wiki-validate` / `wiki-context` / `wiki-slug` / `wiki-links` / `wiki-graph`（全グラフ俯瞰・島検出）/ `wiki-traverse`（N ホップ近傍収集）
    - write 系: `wiki-init` / `wiki-index-upsert` / `wiki-log` / `wiki-new` / `wiki-move` / `wiki-rename-topic`
    - 複雑なテキスト操作（index 編集・move・rename・validate・links）は bash 内のヒートドキュメント Python で実装し、値は環境変数で受け渡す。
 2. **`skills/`** — `/wiki-*` コマンドの実体かつ自動トリガ。各スキルはスクリプトを呼ぶ手順書。`llm-wiki` が中核の知識スキルで規約と手順を持ち、`references/conventions.md`（規約全文）・`references/operations.md`（手順詳細）・`assets/templates/*.md`（ページ雛形）を参照する。
-3. **`hooks/hooks.json`** — 暗黙参照。`SessionStart` と `UserPromptSubmit` の両方が `wiki-context.sh` を呼ぶ（引数 `session` / `prompt`）。
+3. **`agents/*.md`** — read が重い／並列化できるフェーズの隔離実行。`wiki-source-analyst`（ingest の取得〜ページ案）・`wiki-auditor`（lint の意味的監査・トピック単位並列）・`wiki-researcher`（query の大規模調査）。**エージェントは read・判断のみを担い提案/findings/回答を返す。書き込み（flock 直列化）とユーザ確認は本流に集約する**（例外: analyst の `raw/` 保存のみ）。スキルから委譲し、フックからは起動しない。委譲基準と返却契約は `operations.md` の「サブエージェント委譲」。
+4. **`hooks/hooks.json`** — 暗黙参照。`SessionStart` と `UserPromptSubmit` の両方が `wiki-context.sh` を呼ぶ（引数 `session` / `prompt`）。
 
 ### `_lib.sh` が提供する共通基盤
 
