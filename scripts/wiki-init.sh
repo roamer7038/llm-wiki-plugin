@@ -29,6 +29,8 @@ ensure_file "$root/config.yml" 'version: 1
 language: ja
 # 自動参照(UserPromptSubmit リマインド)を無効化したい場合は次を false に
 auto_reference: true
+# Git 自動バージョン管理(Stop フックでターン毎にコミット)。無効化は次を false に
+git: true
 # 既定は最小コア4種。decisions/queries/journal 等はオプトイン（/wiki-topic add で追加）。
 page_types:
   - {name: papers,   desc: 論文の要約}
@@ -65,6 +67,9 @@ updated: '"$(date +%F)"'
 if ! grep -q '^## \[' "$root/log.md" 2>/dev/null; then :; fi
 printf '## [%s] init | global | Wiki 初期化\n- 構造とデフォルト config を生成\n\n' \
   "$(date '+%F %H:%M')" >> "$root/log.md"
+
+# Git: 初回は repo init + .gitignore + baseline コミット（git 有効時のみ・冪等）
+wiki_git_commit "init | global | Wiki 初期化"
 
 # 結果サマリ
 if [ "${#created[@]}" -eq 0 ]; then

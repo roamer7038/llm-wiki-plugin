@@ -1,5 +1,5 @@
 {
-  "description": "LLM Wiki: セッション開始時に Wiki の所在を注入し、知識質問時に参照をリマインドする（暗黙参照）。Wiki 未初期化時は無出力。",
+  "description": "LLM Wiki: セッション開始時に Wiki の所在を注入し、知識質問時に参照をリマインドする（暗黙参照）。Stop 時にそのターンの変更を git へ自動コミットする。Wiki 未初期化／git 無効時は無出力。",
   "hooks": {
     "SessionStart": [
       {
@@ -21,6 +21,18 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-context.sh prompt",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-commit.sh",
+            "timeout": 15
           }
         ]
       }

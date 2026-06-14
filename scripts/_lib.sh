@@ -28,3 +28,95 @@ acquire_write_lock() {
   exec 9>"$r/.lock/wiki.lock"
   flock 9
 }
+
+# ---- Git バージョン管理（任意・安全網） ----
+# 思想: git は「あれば効く安全網」であって必須依存ではない。git が無い／無効でも
+# write 操作は成功させる（read 系・フックがセッションを止めないのと同じ精神）。
+# 自動コミットは Stop フック（wiki-commit.sh）がターン単位でまとめて行う。
+
+# git コマンドがあり config.yml に `git: false` が無ければ有効（既定は有効）。
+git_enabled() {
+  command -v git >/dev/null 2>&1 || return 1
+  ! grep -qE '^git:[[:space:]]*false' "$(wiki_root)/config.yml" 2>/dev/null
+}
+
+# 固定アイデンティティ・署名なしで git を実行（ユーザの git 設定に依存しない）。
+wiki_git() {
+  git -C "$(wiki_root)" \
+    -c user.name=llm-wiki -c user.email=llm-wiki@localhost \
+    -c commit.gpgsign=false "$@"
+}
+
+# リポジトリ未作成なら init し .gitignore を用意（冪等）。git 無効なら何もしない。
+# 既存 Wiki への遅延移行を兼ねる（初回 commit 時に repo を立てる）。
+wiki_git_init() {
+  git_enabled || return 0
+  local r; r="$(wiki_root)"
+  [ -d "$r/.git" ] && return 0
+  wiki_git init -q
+  [ -f "$r/.gitignore" ] || cat > "$r/.gitignore" <<'EOF'
+# 排他ロック（実行時のみ）
+.lock/
+# バイナリ・非テキスト原典は履歴に含めない（版管理するのは知識テキストのみ）。
+# raw/ の生バイト原典は対象外。抽出済みテキスト(.md)は通常どおり追跡される。
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+*.ico
+*.tif
+*.tiff
+*.svgz
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.odt
+*.ods
+*.odp
+*.zip
+*.tar
+*.gz
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.mp3
+*.mp4
+*.m4a
+*.mov
+*.avi
+*.wav
+*.flac
+*.webm
+*.mkv
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.o
+*.a
+*.woff
+*.woff2
+*.ttf
+*.otf
+*.eot
+EOF
+}
+
+# 変更があれば 1 コミットを作る（メッセージ指定）。無変更なら no-op。git 無効なら何もしない。
+# 呼び出し側で acquire_write_lock を保持していること。
+wiki_git_commit() {
+  git_enabled || return 0
+  wiki_git_init
+  wiki_git add -A
+  if wiki_git diff --cached --quiet; then return 0; fi
+  wiki_git commit -q -m "$1"
+}

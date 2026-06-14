@@ -97,6 +97,15 @@
 - config.yml の更新と対応ディレクトリの作成/退避を同期し、log に記録する。
 - ページ種別の追加も同様（`global/wiki/<name>/` と各 topic に作成）。
 
+## 履歴 / 復旧（Git バージョン管理）
+
+Wiki は git で自動バージョン管理される（`config.yml: git: true` のとき。`git` コマンドが無ければ自動的に無効・write は通常どおり成功）。コミットは **Stop フック（`wiki-commit.sh`）がターン単位で自動実行**する — 1 回の論理作業（ingest が内部で起こす new+index+log+リンク更新など）が 1 コミットにまとまる。手動でコミットを打つ必要はない。
+
+- `wiki-history.sh [scope] [count]` — 変更履歴を `<hash>  <日時>  op | scope | title` で表示（既定 20 件）。「最近どう変わったか」「どこまで戻せるか」の確認に。
+- `wiki-restore.sh <hash>` — 指定コミットの状態へ**非破壊で巻き戻す**。`reset --hard` はしない: 未コミット変更を退避コミットしてから対象ツリーへ一致させ、**新しいコミットとして積む**。履歴は前進のみで、復元自体もさらに巻き戻せる。実行後に `wiki-validate.sh` を自動実行する。
+- ユーザが「さっきの取り込みを取り消したい / 前の状態に戻したい」と言ったら、`wiki-history.sh` で候補 hash を提示 → 合意の上で `wiki-restore.sh <hash>`。
+- バイナリ・非テキスト原典（PDF・画像・Office・アーカイブ等）は `.gitignore` で版管理対象外。版管理するのは知識テキスト（`.md`）のみ。
+
 ## チェックリスト（ingest 完了時）
 
 - [ ] 抽出テキストを raw/ にスナップショット保存し（省略時は raw/sources.md に理由を記録）、source_id を控えた
