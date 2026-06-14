@@ -38,7 +38,7 @@ bash scripts/wiki-validate.sh        # 健全性チェック（常に exit 0）
 ### 3層構成
 
 1. **`scripts/*.sh`** — 全操作の実体。すべて `_lib.sh` を source する。
-   - read 系: `wiki-path` / `wiki-search` / `wiki-validate` / `wiki-context` / `wiki-slug` / `wiki-links`
+   - read 系: `wiki-path` / `wiki-search` / `wiki-validate` / `wiki-context` / `wiki-slug` / `wiki-links` / `wiki-graph`（全グラフ俯瞰・島検出）/ `wiki-traverse`（N ホップ近傍収集）
    - write 系: `wiki-init` / `wiki-index-upsert` / `wiki-log` / `wiki-new` / `wiki-move` / `wiki-rename-topic`
    - 複雑なテキスト操作（index 編集・move・rename・validate・links）は bash 内のヒートドキュメント Python で実装し、値は環境変数で受け渡す。
 2. **`skills/`** — `/wiki-*` コマンドの実体かつ自動トリガ。各スキルはスクリプトを呼ぶ手順書。`llm-wiki` が中核の知識スキルで規約と手順を持ち、`references/conventions.md`（規約全文）・`references/operations.md`（手順詳細）・`assets/templates/*.md`（ページ雛形）を参照する。
@@ -70,7 +70,7 @@ bash scripts/wiki-validate.sh        # 健全性チェック（常に exit 0）
 参考に、現状の主要な on-disk 契約（変えてよいが移行を伴うもの）:
 
 - slug: ASCII 小文字化／日本語そのまま保持／漢字ローマ字化はしない（`wiki-slug.sh`）。
-- リンク: `[[scope/page_type/slug]]`（同一ディレクトリのみ短縮形可）。
+- リンク: `[[scope/wiki/page_type/slug]]`（ファイル実体パスに一致。同一ディレクトリのみ短縮形可）。
 - index 行: `- [[link]] — 要約 | kw: …`。log: `## [YYYY-MM-DD HH:MM] op | scope | title`（いずれも grep パース前提）。
 - config.yml は機械パースせず、topics/page_types はディレクトリ構造から列挙。
 - 既定はコア4種（papers/articles/concepts/entities）、その他はオプトイン。

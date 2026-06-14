@@ -23,4 +23,4 @@ superseded_by: ""
 <選んだ理由、検討した代替案>
 
 ## 関連
-- [[<scope>/concepts/<関連>]]
+- [[<scope>/wiki/concepts/<関連>]]

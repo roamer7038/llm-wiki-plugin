@@ -75,14 +75,16 @@
 
 ## Links / グラフ確認
 
-- `wiki-links.sh <ref> [--inbound|--outbound]` で発リンク・被リンク・index 掲載状況を表示。
-- 再編前の影響確認（誰がこのページを指しているか）、孤立調査、近傍ナビに使う。
+- `wiki-links.sh <ref> [--inbound|--outbound]` — 1 ホップの発リンク・被リンク・index 掲載状況。再編前の影響確認（誰がこのページを指すか）・孤立調査に。
+- `wiki-traverse.sh <ref> [--depth N] [--outbound|--inbound|--both]` — 起点から N ホップ辿って近傍ページを index 要約つきで収集（既定 depth=2, both）。回答前の文脈集めに（検索で起点→辿る）。
+- `wiki-graph.sh [--summary|--json|--dot] [scope]` — グラフ全体の俯瞰。連結成分（島）・孤立ページ・被リンクハブ・リンク切れを一覧。
+- ref は `scope/wiki/page_type/slug` 形式。
 
 ## Move / Rename / 再編
 
 - 再編前に `wiki-links.sh <ref>` で被リンクを確認し、影響範囲を把握してから実行する。
 - **ページ**の rename（同スコープ・slug 変更）・別スコープへの move・トピック切り出しは `wiki-move.sh <from-ref> <to-ref>`。
-  - 例: `wiki-move.sh global/concepts/機械学習 topics/ml/concepts/機械学習`
+  - 例: `wiki-move.sh global/wiki/concepts/機械学習 topics/ml/wiki/concepts/機械学習`
   - ファイル移動・frontmatter 更新・全 inbound リンク書換え・両スコープ index 更新・log 追記を一括で行う。
 - **トピック**の改名は `wiki-rename-topic.sh <old> <new>`（トピック名のみ。`topics/` や `/` は付けない）。
   - 例: `wiki-rename-topic.sh ml machine-learning`

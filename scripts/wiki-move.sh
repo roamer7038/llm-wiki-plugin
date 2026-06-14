@@ -19,11 +19,13 @@ root=os.environ['LLM_WIKI_ROOT']
 fr=os.environ['LLM_WIKI_FROM'].strip('/'); to=os.environ['LLM_WIKI_TO'].strip('/')
 
 def split_ref(ref):
-    parts=ref.split('/')
+    # 新形式 scope/wiki/pt/slug を基準。旧形式 scope/pt/slug も受理。返す scope は wiki を含まない。
+    parts=[p for p in ref.split('/') if p]
+    if 'wiki' in parts:
+        wi=parts.index('wiki'); return '/'.join(parts[:wi]), parts[wi+1], parts[wi+2]
     if len(parts)<3:
-        sys.exit(f"ref 形式が不正: {ref} (期待: scope/page_type/slug)")
-    slug=parts[-1]; pt=parts[-2]; scope='/'.join(parts[:-2])
-    return scope, pt, slug
+        sys.exit(f"ref 形式が不正: {ref} (期待: scope/wiki/page_type/slug)")
+    return '/'.join(parts[:-2]), parts[-2], parts[-1]
 
 fs, fpt, fslug = split_ref(fr)
 ts, tpt, tslug = split_ref(to)
@@ -52,8 +54,8 @@ open(tfile,'w',encoding='utf-8').write(text)
 os.remove(ffile)
 
 # inbound リンク書換え: 絶対形 [[fs/fpt/fslug]] -> [[ts/tpt/tslug]]
-abs_from=f"[[{fs}/{fpt}/{fslug}]]"
-abs_to=f"[[{ts}/{tpt}/{tslug}]]"
+abs_from=f"[[{fs}/wiki/{fpt}/{fslug}]]"
+abs_to=f"[[{ts}/wiki/{tpt}/{tslug}]]"
 # 移動元と同一ディレクトリ内の短縮形 [[fslug]] も対象（書換え後は絶対形へ正規化）
 short_from=f"[[{fslug}]]"
 from_dir=os.path.join(root, fs, 'wiki', fpt)
@@ -72,7 +74,7 @@ for path in glob.glob(os.path.join(root,'**','*.md'), recursive=True):
 
 # index: 旧スコープから当該行を除去し、要約/kw を回収
 def index_path(scope): return os.path.join(root, scope, 'index.md')
-old_link=f"[[{fs}/{fpt}/{fslug}]]"
+old_link=f"[[{fs}/wiki/{fpt}/{fslug}]]"
 summary=""; kw=""
 ip=index_path(fs)
 if os.path.exists(ip):
@@ -97,7 +99,7 @@ if not summary:
 
 # index: 新スコープへ追加（節を作り末尾挿入）
 ip2=index_path(ts)
-new_link=f"[[{ts}/{tpt}/{tslug}]]"
+new_link=f"[[{ts}/wiki/{tpt}/{tslug}]]"
 new_line=f"- {new_link} — {summary}" + (f" | kw: {kw}" if kw else "")
 if os.path.exists(ip2):
     lines=open(ip2,encoding='utf-8').read().split('\n')

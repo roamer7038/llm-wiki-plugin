@@ -58,7 +58,7 @@ open(target,'w',encoding='utf-8').write(t)
 # summary 指定時は index を upsert（ロック保持中のため inline 実装）
 if summary.strip():
     idx=os.path.join(root, scope, 'index.md')
-    link=f"[[{scope}/{pt}/{slug}]]"
+    link=f"[[{scope}/wiki/{pt}/{slug}]]"
     line=f"- {link} — {summary.strip()}" + (f" | kw: {kw.strip()}" if kw.strip() else "")
     lines=open(idx,encoding='utf-8').read().split('\n') if os.path.exists(idx) else [f"# Index — {scope}",""]
     header=f"## {pt}"; hi=None

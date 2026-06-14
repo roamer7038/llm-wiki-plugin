@@ -27,7 +27,7 @@ pt=os.environ['LLM_WIKI_PT']; slug=os.environ['LLM_WIKI_SLUG']
 summary=os.environ['LLM_WIKI_SUMMARY']; kw=os.environ['LLM_WIKI_KW']
 
 os.makedirs(os.path.dirname(idx), exist_ok=True)
-link=f"[[{scope}/{pt}/{slug}]]"
+link=f"[[{scope}/wiki/{pt}/{slug}]]"
 line=f"- {link} — {summary}"
 if kw.strip():
     line += f" | kw: {kw.strip()}"

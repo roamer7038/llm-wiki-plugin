@@ -15,4 +15,4 @@ date: <YYYY-MM-DD>
 <経験・所感・メモ>
 
 ## 関連
-- [[<scope>/concepts/<関連>]]
+- [[<scope>/wiki/concepts/<関連>]]

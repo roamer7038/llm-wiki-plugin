@@ -18,11 +18,15 @@ root=os.environ['LLM_WIKI_ROOT']
 ref=os.environ['LLM_WIKI_REF'].strip('/')
 mode=os.environ['LLM_WIKI_MODE']
 
-parts=ref.split('/')
-if len(parts)<3:
-    raise SystemExit(f"ref 形式が不正: {ref} (期待: scope/page_type/slug)")
-slug=parts[-1]; pt=parts[-2]; scope='/'.join(parts[:-2])
-target=f"{scope}/{pt}/{slug}"
+parts=[p for p in ref.split('/') if p]
+# 新形式 scope/wiki/pt/slug を基準に解析。旧形式 scope/pt/slug も受理（wiki を補う）。
+if 'wiki' in parts:
+    wi=parts.index('wiki'); scope='/'.join(parts[:wi]); pt=parts[wi+1]; slug=parts[wi+2]
+elif len(parts)>=3:
+    slug=parts[-1]; pt=parts[-2]; scope='/'.join(parts[:-2])
+else:
+    raise SystemExit(f"ref 形式が不正: {ref} (期待: scope/wiki/page_type/slug)")
+target=f"{scope}/wiki/{pt}/{slug}"
 tfile=os.path.join(root, scope, 'wiki', pt, slug+'.md')
 
 link_re=re.compile(r'\[\[([^\]]+)\]\]')
@@ -30,11 +34,11 @@ def rel(p): return os.path.relpath(p, root)
 
 def page_ref(p):
     r=rel(p)[:-3]; pr=r.split(os.sep); wi=pr.index('wiki')
-    return f"{'/'.join(pr[:wi])}/{pr[wi+1]}/{pr[wi+2]}", '/'.join(pr[:wi]), pr[wi+1]
+    return f"{'/'.join(pr[:wi])}/wiki/{pr[wi+1]}/{pr[wi+2]}", '/'.join(pr[:wi]), pr[wi+1]
 
 def resolve(tgt, pscope, ppt):
     # 絶対形はそのまま。短縮形は同一ディレクトリ前提で補完。
-    return tgt if '/' in tgt else (f"{pscope}/{ppt}/{tgt}" if pscope else tgt)
+    return tgt if '/' in tgt else (f"{pscope}/wiki/{ppt}/{tgt}" if pscope else tgt)
 
 allpages=glob.glob(os.path.join(root,'**','wiki','**','*.md'), recursive=True)
 existing={page_ref(p)[0] for p in allpages}

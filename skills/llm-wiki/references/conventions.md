@@ -18,7 +18,7 @@
 
 - **papers / articles**: `sources`（原典の逆引き配列）, `source_id`（重複検出用）, `source_type`（paper/article/book/web/note）
 - **entities**: `entity_kind`（person/org/product/place）
-- **decisions**: `date`, `status`（active/superseded）, `superseded_by`（status=superseded 時、`scope/page_type/slug`）
+- **decisions**: `date`, `status`（active/superseded）, `superseded_by`（status=superseded 時、`scope/wiki/page_type/slug`）
 - **queries**: `question`, `sources`
 
 発リンクの正本は本文の `[[...]]`。frontmatter に発リンク一覧は持たない。
@@ -41,7 +41,7 @@
 
 ## リンク
 
-- 正本はスコープ修飾の絶対形: `[[scope/page_type/slug]]`。例 `[[global/concepts/機械学習]]`、`[[topics/rust/concepts/ownership]]`。
+- 正本はファイルパスに一致する絶対形: `[[scope/wiki/page_type/slug]]`。例 `[[global/wiki/concepts/機械学習]]`、`[[topics/rust/wiki/concepts/ownership]]`。`wiki/` セグメントを必ず含める（ディスク上の実体パス `scope/wiki/page_type/slug.md` と 1:1 対応させ、人間の直接編集でも取り違えないため）。
 - 同一ディレクトリ内に限り短縮形 `[[slug]]` を許可。それ以外の短縮形は `wiki-validate.sh` が曖昧参照として警告。
 - move/rename はリンク書換えを伴うため必ず `wiki-move.sh` 経由。
 
@@ -51,7 +51,7 @@
 # Index — <scope>
 
 ## <page_type>
-- [[<scope>/<page_type>/<slug>]] — <一行要約> | kw: <検索語, …>
+- [[<scope>/wiki/<page_type>/<slug>]] — <一行要約> | kw: <検索語, …>
 ```
 
 - 種別見出しごとに 1 行 1 エントリ。

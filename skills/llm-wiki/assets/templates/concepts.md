@@ -17,5 +17,5 @@ tags: []
 <仕組み・背景・重要点>
 
 ## 関連
-- 関連概念: [[<scope>/concepts/<関連>]]
-- 出典: [[<scope>/papers/<論文>]]
+- 関連概念: [[<scope>/wiki/concepts/<関連>]]
+- 出典: [[<scope>/wiki/papers/<論文>]]

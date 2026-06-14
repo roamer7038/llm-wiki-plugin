@@ -18,4 +18,4 @@ entity_kind: <person | org | product | place>
 <経歴・特徴・関係など>
 
 ## 関連
-- [[<scope>/concepts/<関連>]]
+- [[<scope>/wiki/concepts/<関連>]]

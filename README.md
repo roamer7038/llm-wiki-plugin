@@ -88,7 +88,7 @@ Claude Code 内で以下を実行する:
 ## 規約（要点）
 
 - **ファイル名 slug**: タイトルを決定論的にサニタイズして生成（日本語はそのまま保持。例「機械学習」→ `機械学習.md`）。手で命名しない。
-- **リンク**: 正本はスコープ修飾の絶対形 `[[scope/page_type/slug]]`。短縮形 `[[slug]]` は同一ディレクトリ内のみ。
+- **リンク**: 正本はファイル実体パスに一致する絶対形 `[[scope/wiki/page_type/slug]]`。短縮形 `[[slug]]` は同一ディレクトリ内のみ。
 - **index.md**: 種別見出しごとに `- [[link]] — 一行要約 | kw: 検索語…`。`kw:` が日本語検索の弱点を補う。
 - **log.md**: `## [YYYY-MM-DD HH:MM] <op> | <scope> | <title>`（`grep "^## \["` でパース可能）。
 - **frontmatter 必須**: `title` / `page_type` / `scope` / `created` / `updated`。

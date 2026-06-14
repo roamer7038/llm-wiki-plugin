@@ -10,12 +10,12 @@ LLM Wiki の再編を行う。ファイル移動・frontmatter 更新・**全 in
 
 再編の前後で `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-links.sh <ref>` を使い、**何が壊れるか（被リンク）を確認**してから実行すると安全。
 
-## ページの移動・改名（ref 形式 `scope/page_type/slug`）
+## ページの移動・改名（ref 形式 `scope/wiki/page_type/slug`）
 
 ```
 bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-move.sh "<from-ref>" "<to-ref>"
 ```
-- 例: `wiki-move.sh global/concepts/機械学習 topics/ml/concepts/機械学習`
+- 例: `wiki-move.sh global/wiki/concepts/機械学習 topics/ml/wiki/concepts/機械学習`
 - ファイル移動・frontmatter（scope/page_type/updated）更新・全 inbound リンク書換え・両スコープ index 更新・log を一括実行。
 
 ## トピックの改名（サブツリーごと）
@@ -30,9 +30,12 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-rename-topic.sh <old> <new>
 
 ```
 bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-links.sh <ref> [--inbound|--outbound]
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-traverse.sh <ref> [--depth N] [--outbound|--inbound|--both]
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-graph.sh [--summary|--json|--dot] [scope]
 ```
-- outbound（このページが張るリンク）/ inbound（被リンク）/ index 掲載状況を表示。
-- 再編の影響確認、孤立ページの調査、近傍ナビに使う。
+- `wiki-links`: 1 ホップの outbound / inbound / index 掲載状況。再編の影響確認・孤立調査に。
+- `wiki-traverse`: 起点から N ホップ辿って近傍ページを index 要約つきで収集（既定 depth=2, both）。関連文脈の収集に。
+- `wiki-graph`: グラフ全体の俯瞰。連結成分（島）・孤立ページ・被リンクハブ・リンク切れを一覧。
 
 ## 手順
 

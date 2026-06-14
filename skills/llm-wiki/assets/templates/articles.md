@@ -20,7 +20,7 @@ source_type: article
 <内容の要約>
 
 ## 関連
-- 関連: [[<scope>/concepts/<関連概念>]]
+- 関連: [[<scope>/wiki/concepts/<関連概念>]]
 
 ## 出典
 - <scope>/raw/<原典ファイル>

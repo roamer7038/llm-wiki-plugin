@@ -19,5 +19,5 @@ sources: []
 <比較・分析・結論。出典付き。>
 
 ## 参照したページ
-- [[<scope>/papers/<論文>]]
-- [[<scope>/concepts/<概念>]]
+- [[<scope>/wiki/papers/<論文>]]
+- [[<scope>/wiki/concepts/<概念>]]

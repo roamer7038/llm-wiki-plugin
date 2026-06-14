@@ -27,12 +27,12 @@ pages=[p for p in glob.glob(os.path.join(base,'**','wiki','**','*.md'), recursiv
 allpages=[p for p in glob.glob(os.path.join(root,'**','wiki','**','*.md'), recursive=True)]
 
 def page_ref(p):
-    # root/<scope>/wiki/<pt>/<slug>.md -> scope/pt/slug
+    # root/<scope>/wiki/<pt>/<slug>.md -> scope/wiki/pt/slug
     r=rel(p)[:-3]  # strip .md
     parts=r.split(os.sep)
     wi=parts.index('wiki')
     scope_='/'.join(parts[:wi]); pt=parts[wi+1]; slug=parts[wi+2] if len(parts)>wi+2 else parts[-1]
-    return f"{scope_}/{pt}/{slug}", scope_, pt, slug
+    return f"{scope_}/wiki/{pt}/{slug}", scope_, pt, slug
 
 existing_refs={page_ref(p)[0] for p in allpages}
 
@@ -72,7 +72,7 @@ for p in allpages + glob.glob(os.path.join(root,'**','overview.md'), recursive=T
             # 短縮形: 同一ディレクトリ前提
             if pscope is None:
                 warn(f"短縮形リンク[{tgt}]を非ページから使用: {rel(p)}"); continue
-            ref=f"{pscope}/{ppt}/{tgt}"
+            ref=f"{pscope}/wiki/{ppt}/{tgt}"
         inbound[ref]=inbound.get(ref,0)+1
         if ref not in existing_refs:
             err(f"リンク切れ[[{tgt}]]: {rel(p)}")

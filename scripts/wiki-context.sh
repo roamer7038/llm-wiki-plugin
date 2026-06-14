@@ -26,11 +26,26 @@ topics="$(list_dirs "$root/topics" | join_csv || true)"
 ptypes="$(list_dirs "$root/global/wiki" | join_csv || true)"
 [ -n "$topics" ] || topics="(なし)"
 
+# 実在する index.md をエントリ件数つきで列挙（知識の所在を LLM に明示する）。
+# 例示の global/index.md は空のことがあるため、件数で実体のあるスコープを示す。
+index_catalog() {
+  local f n
+  for f in "$root/global/index.md" "$root"/topics/*/index.md; do
+    [ -f "$f" ] || continue
+    n="$(grep -cE '^\- \[\[' "$f" 2>/dev/null || true)"
+    printf '  - %s （%s 件）\n' "$f" "$n"
+  done
+}
+index_list="$(index_catalog || true)"
+[ -n "$index_list" ] || index_list="  （index 未作成）"
+
 if [ "$mode" = "session" ]; then
   ctx="[LLM Wiki] $root にナレッジベースがあります。
 トピック: $topics
 ページ種別: $ptypes
-知識・事実・調査を要する質問に答える前に、該当スコープの index.md（例: $root/global/index.md）を Read し、関連ページを辿ってから出典付きで回答すること。
+知識・事実・調査を要する質問に答える前に、関連スコープの index.md を Read し、関連ページを辿ってから出典付きで回答すること。index は次にある（件数 0 は実体が薄い／未整備）:
+$index_list
+リンクは [[scope/wiki/page_type/slug]] 形式でファイルパスに一致する（例: $root/topics/<topic>/wiki/concepts/<slug>.md）。index から関連ページへ辿れる。
 このセッションで、Web 調査による新たな知見・複雑な問題の根本原因と解決策・複数ソースを合成した再利用価値ある結論が得られたら、回答末尾で wiki-ingest による取り込みを一言提案すること（既存知識・一時的なデバッグ・単純な編集では提案しない。同一セッションで繰り返さない）。
 取り込み・整理・lint・移動などの操作は llm-wiki スキルの手順に従う。"
   emit "SessionStart" "$ctx"
