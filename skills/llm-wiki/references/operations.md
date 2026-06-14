@@ -59,11 +59,31 @@
 - **frontmatter 欠落** → 必須項目（title/page_type/scope/created/updated）を補う。
 - 回復後は再度 `wiki-validate.sh` を通し、ERROR が消えたことを確認する。
 
+## New（手動ページ作成）
+
+目的: ユーザ自身の知識を、テンプレ済みのページとして起こす（ソース駆動の Ingest とは別物）。
+
+1. page_type とスコープを判断し、ユーザに確認。
+2. `wiki-search.sh "<title/別名>"` で重複確認（あれば更新に倒す）。
+3. `wiki-new.sh <scope> <page_type> "<title>" ["<要約>"] ["<kw>"]` で雛形作成（slug 生成・テンプレ配置・frontmatter 記入・index upsert・log を一括、作成パスを返す）。既存があれば上書きせずエラー。
+4. ユーザの記述があれば本文を下書き（placeholder `<...>` を実内容に置換）。無ければ placeholder のまま渡してよい。
+5. `wiki-links.sh`/`wiki-search.sh` で近傍を探し相互リンク。**未使用の placeholder リンク `[[<...>]]` は削除**する。
+6. `wiki-validate.sh <scope>` で検証。
+
+## Links / グラフ確認
+
+- `wiki-links.sh <ref> [--inbound|--outbound]` で発リンク・被リンク・index 掲載状況を表示。
+- 再編前の影響確認（誰がこのページを指しているか）、孤立調査、近傍ナビに使う。
+
 ## Move / Rename / 再編
 
-- rename（同スコープ・slug 変更）、別スコープへの move、トピック切り出しはすべて `wiki-move.sh <from-ref> <to-ref>`。
+- 再編前に `wiki-links.sh <ref>` で被リンクを確認し、影響範囲を把握してから実行する。
+- **ページ**の rename（同スコープ・slug 変更）・別スコープへの move・トピック切り出しは `wiki-move.sh <from-ref> <to-ref>`。
   - 例: `wiki-move.sh global/concepts/機械学習 topics/ml/concepts/機械学習`
   - ファイル移動・frontmatter 更新・全 inbound リンク書換え・両スコープ index 更新・log 追記を一括で行う。
+- **トピック**の改名は `wiki-rename-topic.sh <old> <new>`（トピック名のみ。`topics/` や `/` は付けない）。
+  - 例: `wiki-rename-topic.sh ml machine-learning`
+  - サブツリーごと改名し、配下全ページの scope・全 wiki の `[[topics/<old>/...]]` リンク・config.yml の topics 名・各 index を更新する。互換維持・再整理の道具。
 - 手で `mv` したり index を手書きしない（リンク切れの原因になる）。
 
 ## トピック / 種別の追加・削除

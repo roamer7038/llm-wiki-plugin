@@ -49,10 +49,11 @@ Claude Code 内で以下を実行する:
 |--------|------|
 | `/wiki-init` | Wiki を初期化する |
 | `/wiki-ingest <path-or-url> [topic]` | ソースを取り込み、要約ページ・関連ページ・index/log を更新（確認付き） |
+| `/wiki-new <title>` | ユーザ自身の知識を手動でページ化（テンプレ雛形を用意し、記述があれば下書き） |
 | `/wiki-query <question>` | Wiki を参照し、出典付きで回答。良い回答は還元可 |
 | `/wiki-lint [scope]` | 健全性チェック（リンク切れ・孤立・矛盾・データギャップ等）と改善提案 |
 | `/wiki-topic <add\|list\|remove> [name] [desc]` | トピック／ページ種別の管理 |
-| `/wiki-move <from-ref> <to-ref>` | ページの移動・改名（inbound リンク書換え込み） |
+| `/wiki-move` | ページの移動・改名、トピックの改名、リンクグラフ確認（inbound リンク書換え込み） |
 
 加えて、規約・手順を提供する知識スキル `llm-wiki` が Wiki 操作時に自動で参照される。
 

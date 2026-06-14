@@ -57,7 +57,7 @@
 - <bullet>
 ```
 
-- `<op>`: init / ingest / query / lint / topic / move。
+- `<op>`: init / ingest / new / query / lint / topic / move（トピック改名も move）。
 - `grep "^## \[" log.md` でエントリ一覧を取得可能。
 - 追記は `wiki-log.sh` で行う（flock 保護）。
 

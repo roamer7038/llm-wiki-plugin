@@ -59,9 +59,13 @@ link_re=re.compile(r'\[\[([^\]]+)\]\]')
 inbound={}  # ref -> count
 for p in allpages + glob.glob(os.path.join(root,'**','overview.md'), recursive=True):
     t=open(p,encoding='utf-8').read()
-    _, pscope, ppt, _ = (page_ref(p) if os.sep+'wiki'+os.sep in p else (None, None, None, None))
+    is_page = 'wiki' in rel(p).split(os.sep)
+    _, pscope, ppt, _ = page_ref(p) if is_page else (None, None, None, None)
     for mt in link_re.finditer(t):
         tgt=mt.group(1).strip()
+        # テンプレ未編集の placeholder（<...> を含む）はリンク扱いしない
+        if '<' in tgt or '>' in tgt:
+            continue
         if '/' in tgt:
             ref=tgt
         else:
@@ -84,8 +88,10 @@ for ip in glob.glob(os.path.join(base if scope else root,'**','index.md'), recur
     t=open(ip,encoding='utf-8').read()
     n_entries=0
     for mt in link_re.finditer(t):
-        n_entries+=1
         tgt=mt.group(1).strip()
+        if '<' in tgt or '>' in tgt:
+            continue
+        n_entries+=1
         if tgt not in existing_refs:
             err(f"index が存在しないページを参照[{tgt}]: {rel(ip)}")
     if t.count('\n')>INDEX_WARN:
