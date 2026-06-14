@@ -48,9 +48,16 @@ prompt="$(printf '%s' "$input" | jq -r '.prompt // .user_prompt // empty' 2>/dev
 [ -n "$prompt" ] || exit 0
 
 # 照合キーワード: 各 index.md の kw: 行のみ（軽量・上限）＋ トピック名
+# 区切り（半角/全角コンマ）での分割は python で行う。tr はバイト処理で多バイト
+# 文字（全角コンマ・日本語語彙）を寸断し壊すため使わない。
 kws="$(grep -arhoE 'kw:.*$' "$root"/global/index.md "$root"/topics/*/index.md 2>/dev/null \
-        | sed 's/^kw://' | tr ',、' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-        | grep -av '^$' | sort -u || true)"
+        | sed 's/^kw://' \
+        | python3 -c 'import sys,re
+for line in sys.stdin:
+    for w in re.split("[,、]", line):
+        w = w.strip()
+        if w: print(w)' \
+        | sort -u || true)"
 topic_names="$(list_dirs "$root/topics" || true)"
 
 matched=0
