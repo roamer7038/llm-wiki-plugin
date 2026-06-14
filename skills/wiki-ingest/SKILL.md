@@ -11,7 +11,7 @@ version: 0.1.0
 llm-wiki スキルと `skills/llm-wiki/references/operations.md` の Ingest 手順に厳密に従うこと。要点:
 
 1. 未初期化なら `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-path.sh` で確認し、wiki-init を促す。
-2. 対象を取得（URL は WebFetch、ローカルは Read）し、取得元メタ（URL・取得日・`source_id`）を該当 `<scope>/raw/` に記録（例 `raw/sources.md`）。原典全文の保存は任意。`source_id`（URL 正規化 or ファイル hash）を控える。
+2. 対象を取得（URL は WebFetch、ローカルは Read）し、取得元メタ（URL・取得日・`source_id`）を該当 `<scope>/raw/sources.md` に記録、**読んだ抽出テキストを `<scope>/raw/` にスナップショット保存**する（原則保存。省略は著作権／巨大バイナリ／恒久 URL の例外時のみ、理由を sources.md に記す）。`source_id`（URL 正規化 or ファイル hash）を控える。
 3. `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-search.sh "<title/alias/source_id>"` で**重複を確認**。既存なら更新に倒す。
 4. 要点・該当 page_type・スコープ案を提示し、**ユーザの確認を取る**。スコープ選定:
    - 既存トピックに明確に属する → `topics/<topic>`
