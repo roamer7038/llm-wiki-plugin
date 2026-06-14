@@ -1,6 +1,7 @@
 # llm-wiki
 
 LLM が構築・維持・参照する、永続的・累積的なグラフ構造のナレッジベースを Claude Code に与えるプラグイン。
+**本プラグインは開発中であり、効果の実証や安定性の保証はまだされていない。**
 
 ## コンセプト
 
@@ -107,17 +108,65 @@ Claude Code 内で以下を実行する:
 | `config.yml: page_types` | コア4種 | ページ種別の定義（オプトインで拡張） |
 | `config.yml: topics` | `[]` | トピックの定義 |
 
-## 開発者向け
+---
 
-プラグインの中身を修正・拡張したい場合はローカルクローンから起動する:
+## 開発者向け
 
 ```bash
 git clone https://github.com/roamer7038/llm-wiki-plugin
 cd llm-wiki-plugin
+```
+
+ローカルでの動作確認には 2 つの方法がある。
+
+### 1. `--plugin-dir` で直接起動（最速）
+
+marketplace を介さずローカルディレクトリから直接読み込む。コマンド／スキル／フックの開発はこれが最短。
+
+```bash
 claude --plugin-dir .
 ```
 
-`scripts/` 以下のシェル/Python スクリプトが Wiki の構造操作（index 更新・log 追記・移動・検索）を担う。LLM が直接ファイルを書き換える部分を最小化する設計のため、新機能は基本的に `scripts/` への追加と対応するスキルの更新という形を取る。
+### 2. ローカル marketplace から install（配布フローの検証）
+
+`displayName` / `category` / install UX まで含めて、実際の配布と同じ経路で確認したいとき。`marketplace.json` の `source: "./"` がローカルパス指定にもそのまま対応しているため、GitHub に push せずローカルディレクトリを marketplace として追加できる。
+
+```
+# GitHub 版を入れている場合、同名 llm-wiki と衝突するので先に外す
+/plugin marketplace remove llm-wiki
+
+# ローカルディレクトリを marketplace として追加し install
+/plugin marketplace add ~/llm-wiki-plugin
+/plugin install llm-wiki@llm-wiki
+
+# ソースを編集したら反映
+/plugin marketplace update llm-wiki
+```
+
+いずれの方法でも、**フック（`hooks.json`）の変更反映には Claude Code の再起動が必要**。
+
+### スクリプトの単体テスト
+
+テストフレームワークは無い。本物の `~/.llm-wiki` を汚さないよう、必ず一時 `LLM_WIKI_HOME` で手動検証する。外部依存は `bash` / `python3` / `jq` / `flock` のみ。
+
+```bash
+export LLM_WIKI_HOME="$(mktemp -d)/wiki"
+bash scripts/wiki-init.sh
+bash scripts/wiki-index-upsert.sh global concepts attention "注意機構" "attention, 注意"
+bash scripts/wiki-validate.sh   # 健全性チェック（常に exit 0）
+```
+
+### 構成と設計
+
+| ディレクトリ | 役割 |
+|------|------|
+| `scripts/*.sh` | 全操作の実体。構造生成・index/log 追記・リンク書換え・移動・slug 生成などの決定論処理。すべて `_lib.sh` を source する |
+| `skills/` | `/wiki-*` コマンドの実体かつ自動トリガ。スクリプトを呼ぶ手順書。中核は知識スキル `llm-wiki`（規約・手順・テンプレートを保持） |
+| `hooks/hooks.json` | 暗黙参照。`SessionStart` / `UserPromptSubmit` が `wiki-context.sh` を呼ぶ |
+
+設計の核心は **決定論スクリプトと LLM 判断の分業**。間違えてはいけない定型操作は `scripts/` に固定し、LLM には要約・統合・分類・矛盾検出のみを委ねる。新機能も基本はこの境界を守り、`scripts/` への追加と対応スキルの更新という形を取る。
+
+開発の詳細な規約・アーキテクチャ・変更方針（オンディスク形式を変えるときの移行の仕掛けなど）は [`CLAUDE.md`](CLAUDE.md) を参照。機能変更時は `.claude-plugin/plugin.json` の `version` を更新し、`plugin.json` と `marketplace.json` で重複している説明文を揃えること。
 
 ## ライセンス
 
