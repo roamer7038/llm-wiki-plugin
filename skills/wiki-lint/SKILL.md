@@ -8,8 +8,8 @@ version: 0.1.0
 
 LLM Wiki の健全性をチェックする。範囲はユーザ指定があればそのスコープ（`global` または `topics/<topic>`）、無ければ全体。
 
-1. `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-validate.sh [scope]` を実行し、機械検査の結果（リンク切れ／孤立／index・config 整合／必須 frontmatter／superseded_by／index 肥大化／log 形式）を報告する。
-2. さらに LLM の観点で点検し、`skills/llm-wiki/references/operations.md` の Lint 手順に従って以下を提案する:
+1. **機械検査（本流）**: `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-validate.sh [scope]` を実行し、結果（リンク切れ／孤立／index・config 整合／必須 frontmatter／superseded_by／index 肥大化／log 形式）を報告する。
+2. **意味的監査**: 範囲が複数トピックに及ぶ／全体のときは、**トピック単位で `wiki-auditor` サブエージェントを並列起動**し、各スコープの `## 監査結果` を集約する（委譲基準は `skills/llm-wiki/references/operations.md` の「サブエージェント委譲」）。単一スコープなら本流でそのまま点検してよい。`skills/llm-wiki/references/operations.md` の Lint 手順に従い、以下を提案する:
    - 矛盾するページ対、陳腐化した記述、孤立ページの扱い
    - index に頻出するが専用ページの無い不足概念
    - 複数ページに頻出するが entities ページの無い固有名詞（人物・組織・プロダクト・手法）。entity 化して相互リンクし、グラフ密度を上げるべきか

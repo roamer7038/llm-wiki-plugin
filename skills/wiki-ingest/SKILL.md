@@ -8,6 +8,11 @@ version: 0.1.0
 
 ソース（ファイルパスまたは URL）を LLM Wiki に取り込む。取り込み対象とトピックは、ユーザが呼び出し時に指定したもの（例: `/wiki-ingest <path-or-url> [topic]`）。未指定なら尋ねる。
 
+**重い／複数ソースは `wiki-source-analyst` サブエージェントに委譲する。** 委譲基準・返却フォーマットは `skills/llm-wiki/references/operations.md` の「サブエージェント委譲」を参照。
+
+- **委譲する場合**（長い記事・PDF・複数ソース）: ソースごとに `wiki-source-analyst` を起動（複数は並列）。生ソースの取得・raw 保存・重複検出・ページ案作成までをエージェントが行い、`## 取り込み提案` ブロックを返す。本流は提案を**ユーザに確認** → 承認後に下記 5〜8（ページ書き込み・index・log・validate）を**本流で**実行する。書き込みは flock 直列化のため本流に集約する。
+- **委譲しない場合**（小さい単一ソース）: 以下の手順をインラインで実行する。
+
 llm-wiki スキルと `skills/llm-wiki/references/operations.md` の Ingest 手順に厳密に従うこと。要点:
 
 1. 未初期化なら `bash ${CLAUDE_PLUGIN_ROOT}/scripts/wiki-path.sh` で確認し、wiki-init を促す。
