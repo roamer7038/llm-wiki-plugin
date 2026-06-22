@@ -11,8 +11,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
 
 old="${1:-}"; new="${2:-}"
 [ -n "$old" ] && [ -n "$new" ] || { echo "usage: wiki-rename-topic.sh <old> <new>" >&2; exit 2; }
-# スラッシュを含む値は誤用（トピック名のみ受ける）
-case "$old$new" in */*) echo "トピック名のみ指定してください（scope や / は不可）: $old -> $new" >&2; exit 2;; esac
+# トピック名のみ受ける（スラッシュ・"."・".." 等のパス要素は誤用かつ危険）
+valid_segment "$old" && valid_segment "$new" || {
+  echo "トピック名のみ指定してください（scope や / ・. ・.. は不可）: $old -> $new" >&2; exit 2; }
 wiki_exists || { echo "Wiki 未初期化" >&2; exit 2; }
 root="$(wiki_root)"
 

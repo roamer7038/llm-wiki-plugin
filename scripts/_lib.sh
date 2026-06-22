@@ -20,6 +20,35 @@ wiki_templates_dir() { printf '%s' "$LLM_WIKI_PLUGIN_ROOT/skills/llm-wiki/assets
 # title -> 決定論的 slug
 slugify() { bash "$LLM_WIKI_LIB_DIR/wiki-slug.sh" "$@"; }
 
+# ---- パス安全性バリデータ ----
+# LLM/外部由来の scope・page_type・slug を Wiki ルート配下に封じ込めるための検査。
+# write 系はファイルパスを組む前に必ずこれらで弾く（パストラバーサル防止）。
+# 単一パスセグメントとして安全か（空・"."・".."・スラッシュ・改行を拒否）。
+valid_segment() {
+  case "$1" in
+    ''|.|..) return 1 ;;
+    */*) return 1 ;;
+    *'
+'*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+# scope は 'global' か 'topics/<segment>' のみ許可。
+valid_scope() {
+  case "$1" in
+    global) return 0 ;;
+    topics/*) valid_segment "${1#topics/}" ;;
+    *) return 1 ;;
+  esac
+}
+
+# scope と page_type をまとめて検査し、不正なら 2 で終了。
+require_safe_scope_pt() { # scope page_type
+  valid_scope "$1" || { echo "不正な scope（global か topics/<topic> のみ）: $1" >&2; exit 2; }
+  valid_segment "$2" || { echo "不正な page_type: $2" >&2; exit 2; }
+}
+
 # 全書き込みを直列化する単一グローバルロックの fd を開く。
 # 呼び出し側で acquire_write_lock した後に書き込み、スクリプト終了で自動解放。
 acquire_write_lock() {

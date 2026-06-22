@@ -15,6 +15,7 @@ scope="${1:-}"; ptype="${2:-}"; title="${3:-}"
 shift 3 || true
 summary="${1:-}"; [ "$#" -gt 0 ] && shift || true
 kw="$(printf '%s' "${*:-}")"
+require_safe_scope_pt "$scope" "$ptype"
 wiki_exists || { echo "Wiki 未初期化" >&2; exit 2; }
 root="$(wiki_root)"
 slug="$(slugify "$title")"
@@ -32,6 +33,11 @@ slug=os.environ['LLM_WIKI_SLUG']; template=os.environ['LLM_WIKI_TEMPLATE']
 summary=os.environ['LLM_WIKI_SUMMARY']; kw=os.environ['LLM_WIKI_KW']
 today=datetime.date.today().isoformat()
 
+# index/frontmatter は 1 行構造（grep パース前提）。値の改行は構造を壊す／偽行を
+# 注入できるため空白へ畳む。
+def oneline(s): return ' '.join(s.splitlines())
+title=oneline(title); summary=oneline(summary); kw=oneline(kw)
+
 target=os.path.join(root, scope, 'wiki', pt, slug+'.md')
 if os.path.exists(target):
     sys.exit(f"既に存在します（更新は wiki-index-upsert / 直接編集で）: {scope}/{pt}/{slug}")
@@ -48,11 +54,13 @@ else:
 # frontmatter を埋める（キーがあれば値を差し替え、無ければ追加はしない）
 def set_fm(t, key, val):
     pat=re.compile(rf'^({re.escape(key)}:\s*).*$', re.M)
-    return pat.sub(rf'\g<1>{val}', t, count=1) if pat.search(t) else t
+    # 置換文字列ではなく callable を使い、val 内の \1 や \g<...> がエスケープとして
+    # 解釈される事故を防ぐ。
+    return pat.sub(lambda m: m.group(1)+val, t, count=1) if pat.search(t) else t
 t=set_fm(t,'title',title); t=set_fm(t,'page_type',pt); t=set_fm(t,'scope',scope)
 t=set_fm(t,'created',today); t=set_fm(t,'updated',today)
-# 最初の H1 をタイトルに
-t=re.sub(r'^#\s+.*$', f'# {title}', t, count=1, flags=re.M)
+# 最初の H1 をタイトルに（callable 置換で title 内のエスケープ解釈を防ぐ）
+t=re.sub(r'^#\s+.*$', lambda m: f'# {title}', t, count=1, flags=re.M)
 open(target,'w',encoding='utf-8').write(t)
 
 # summary 指定時は index を upsert（ロック保持中のため inline 実装）
