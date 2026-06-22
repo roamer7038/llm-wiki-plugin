@@ -20,6 +20,35 @@ wiki_templates_dir() { printf '%s' "$LLM_WIKI_PLUGIN_ROOT/skills/llm-wiki/assets
 # title -> 決定論的 slug
 slugify() { bash "$LLM_WIKI_LIB_DIR/wiki-slug.sh" "$@"; }
 
+# ---- パス安全性バリデータ ----
+# LLM/外部由来の scope・page_type・slug を Wiki ルート配下に封じ込めるための検査。
+# write 系はファイルパスを組む前に必ずこれらで弾く（パストラバーサル防止）。
+# 単一パスセグメントとして安全か（空・"."・".."・スラッシュ・改行を拒否）。
+valid_segment() {
+  case "$1" in
+    ''|.|..) return 1 ;;
+    */*) return 1 ;;
+    *'
+'*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+# scope は 'global' か 'topics/<segment>' のみ許可。
+valid_scope() {
+  case "$1" in
+    global) return 0 ;;
+    topics/*) valid_segment "${1#topics/}" ;;
+    *) return 1 ;;
+  esac
+}
+
+# scope と page_type をまとめて検査し、不正なら 2 で終了。
+require_safe_scope_pt() { # scope page_type
+  valid_scope "$1" || { echo "不正な scope（global か topics/<topic> のみ）: $1" >&2; exit 2; }
+  valid_segment "$2" || { echo "不正な page_type: $2" >&2; exit 2; }
+}
+
 # 全書き込みを直列化する単一グローバルロックの fd を開く。
 # 呼び出し側で acquire_write_lock した後に書き込み、スクリプト終了で自動解放。
 acquire_write_lock() {
@@ -111,12 +140,26 @@ wiki_git_init() {
 EOF
 }
 
+# 既知の Wiki 構造のみをステージする。ルート直下に紛れた想定外ファイル
+# （他プロセスや手書きで落ちた無関係ファイル・秘密情報等）を自動コミットに
+# 巻き込まないための絞り込み。安全網であって「全取り込み」ではない。
+# 正規の知識は config.yml / log.md / global/ / topics/ 配下に限られる。
+wiki_git_add_scoped() {
+  local r p paths=()
+  r="$(wiki_root)"
+  for p in config.yml log.md .gitignore global topics; do
+    [ -e "$r/$p" ] && paths+=("$p")
+  done
+  [ "${#paths[@]}" -gt 0 ] || return 0
+  wiki_git add -A -- "${paths[@]}"
+}
+
 # 変更があれば 1 コミットを作る（メッセージ指定）。無変更なら no-op。git 無効なら何もしない。
 # 呼び出し側で acquire_write_lock を保持していること。
 wiki_git_commit() {
   git_enabled || return 0
   wiki_git_init
-  wiki_git add -A
+  wiki_git_add_scoped
   if wiki_git diff --cached --quiet; then return 0; fi
   wiki_git commit -q -m "$1"
 }

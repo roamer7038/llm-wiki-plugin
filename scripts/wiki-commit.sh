@@ -14,7 +14,8 @@ commit_wiki() {
   wiki_git_init
 
   # 変更が無ければ何もしない（毎ターン発火しても git 履歴を汚さない）
-  wiki_git add -A
+  # 既知の Wiki 構造のみをステージ（想定外のルート直下ファイルは巻き込まない）
+  wiki_git_add_scoped
   if wiki_git diff --cached --quiet; then return 0; fi
 
   # コミットメッセージは log.md にこのターン増えた見出し行から導出する。

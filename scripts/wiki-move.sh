@@ -32,6 +32,14 @@ ts, tpt, tslug = split_ref(to)
 ffile=os.path.join(root, fs, 'wiki', fpt, fslug+'.md')
 tfile=os.path.join(root, ts, 'wiki', tpt, tslug+'.md')
 
+# パストラバーサル防止: 解決後パスが Wiki ルート配下に収まることを保証する。
+base=os.path.normpath(os.path.abspath(root))
+def contained(p):
+    rp=os.path.normpath(os.path.abspath(p))
+    return rp==base or rp.startswith(base+os.sep)
+if not (contained(ffile) and contained(tfile)):
+    sys.exit("ref が Wiki ルート外を指しています（不正な scope/page_type/slug）")
+
 if not os.path.exists(ffile):
     sys.exit(f"移動元が存在しません: {ffile}")
 if os.path.exists(tfile):
@@ -45,7 +53,8 @@ today=datetime.date.today().isoformat()
 def set_fm(t, key, val):
     pat=re.compile(rf'^({re.escape(key)}:\s*).*$', re.M)
     if pat.search(t):
-        return pat.sub(rf'\g<1>{val}', t, count=1)
+        # callable 置換で val 内の \1 / \g<...> がエスケープ解釈されるのを防ぐ。
+        return pat.sub(lambda m: m.group(1)+val, t, count=1)
     return t
 text=set_fm(text,'scope',ts)
 text=set_fm(text,'page_type',tpt)

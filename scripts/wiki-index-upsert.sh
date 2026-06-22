@@ -12,6 +12,8 @@ scope="${1:-}"; ptype="${2:-}"; slug="${3:-}"; summary="${4:-}"
 shift 4 || true
 kw="$(printf '%s' "${*:-}")"
 
+require_safe_scope_pt "$scope" "$ptype"
+valid_segment "$slug" || { echo "不正な slug: $slug" >&2; exit 2; }
 wiki_exists || { echo "Wiki 未初期化" >&2; exit 2; }
 root="$(wiki_root)"
 idx="$root/$scope/index.md"
@@ -25,6 +27,10 @@ import os, io
 idx=os.environ['LLM_WIKI_IDX']; scope=os.environ['LLM_WIKI_SCOPE']
 pt=os.environ['LLM_WIKI_PT']; slug=os.environ['LLM_WIKI_SLUG']
 summary=os.environ['LLM_WIKI_SUMMARY']; kw=os.environ['LLM_WIKI_KW']
+
+# index は 1 行 1 エントリ（grep パース前提）。改行は偽行注入になるため畳む。
+def oneline(s): return ' '.join(s.splitlines())
+summary=oneline(summary); kw=oneline(kw)
 
 os.makedirs(os.path.dirname(idx), exist_ok=True)
 link=f"[[{scope}/wiki/{pt}/{slug}]]"
