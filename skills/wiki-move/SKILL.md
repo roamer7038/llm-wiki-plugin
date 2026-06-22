@@ -2,6 +2,7 @@
 name: wiki-move
 description: This skill should be used when the user asks to "ページを移動", "ページを改名", "トピックを改名/リネーム", "wikiを再編", "概念を別トピックに移す", "リンクの繋がりを見たい/被リンクを調べる", "rename a wiki page or topic", or invokes /wiki-move. Moves/renames an LLM Wiki page or whole topic (rewriting inbound links and indexes), and inspects the link graph.
 version: 0.2.0
+allowed-tools: Bash(*wiki-*.sh*)
 ---
 
 # wiki-move — ページ／トピックの移動・改名とグラフ確認

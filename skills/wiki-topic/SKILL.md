@@ -2,6 +2,7 @@
 name: wiki-topic
 description: This skill should be used when the user asks to "トピックを追加", "wikiのトピックを管理", "ページ種別を追加", "list topics", or invokes /wiki-topic. Adds, lists, or removes LLM Wiki topics (and page types), keeping config.yml and directories in sync.
 version: 0.1.0
+allowed-tools: Bash(*wiki-*.sh*)
 ---
 
 # wiki-topic — トピック/ページ種別の管理

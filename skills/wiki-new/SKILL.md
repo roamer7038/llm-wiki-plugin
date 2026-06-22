@@ -2,6 +2,7 @@
 name: wiki-new
 description: This skill should be used when the user wants to write their own knowledge into the wiki — "新しいページを作りたい", "こういうナレッジを書きたい", "メモを残したい", "wikiにページを追加（手動で）", "scaffold a wiki page", or invokes /wiki-new. Scaffolds a new LLM Wiki page from a template with frontmatter pre-filled, optionally drafting the body from the user's description. Distinct from wiki-ingest (which is source-driven); this is for the user's own knowledge.
 version: 0.1.0
+allowed-tools: Bash(*wiki-*.sh*)
 ---
 
 # wiki-new — 手動でナレッジページを作る

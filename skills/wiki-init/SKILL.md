@@ -2,6 +2,7 @@
 name: wiki-init
 description: This skill should be used when the user asks to "wikiを初期化", "LLM Wikiをセットアップ", "set up the wiki", "wikiを作る", or invokes /wiki-init. Initializes the LLM Wiki at ~/.llm-wiki with the default structure and config.
 version: 0.1.0
+allowed-tools: Bash(*wiki-init.sh*)
 ---
 
 # wiki-init — LLM Wiki の初期化

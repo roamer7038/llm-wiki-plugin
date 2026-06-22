@@ -1,7 +1,7 @@
 ---
 name: wiki-auditor
 description: Use this agent for the semantic half of an LLM Wiki health check — detecting contradictions, staleness, missing concepts, un-entitied proper nouns, and data gaps that the deterministic validator cannot catch. Typical triggers include /wiki-lint over a large wiki, "矛盾や陳腐化を点検して", and a topic-by-topic audit run in parallel. NOT for the mechanical checks (broken links / orphans / frontmatter) — those run inline via wiki-validate.sh. See "When to invoke" in the agent body for worked scenarios.
-model: sonnet
+model: inherit
 color: yellow
 tools: ["Read", "Grep", "Glob", "Bash"]
 ---
