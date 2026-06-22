@@ -25,7 +25,7 @@ short="$(wiki_git rev-parse --short "$full")"
 subj="$(wiki_git log -1 --pretty=format:'%s' "$full")"
 
 # 1) 未コミット変更を退避（失っても戻せるように）
-wiki_git add -A
+wiki_git_add_scoped
 if ! wiki_git diff --cached --quiet; then
   wiki_git commit -q -m "snapshot | global | restore 前の自動退避"
 fi

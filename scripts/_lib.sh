@@ -140,12 +140,26 @@ wiki_git_init() {
 EOF
 }
 
+# 既知の Wiki 構造のみをステージする。ルート直下に紛れた想定外ファイル
+# （他プロセスや手書きで落ちた無関係ファイル・秘密情報等）を自動コミットに
+# 巻き込まないための絞り込み。安全網であって「全取り込み」ではない。
+# 正規の知識は config.yml / log.md / global/ / topics/ 配下に限られる。
+wiki_git_add_scoped() {
+  local r p paths=()
+  r="$(wiki_root)"
+  for p in config.yml log.md .gitignore global topics; do
+    [ -e "$r/$p" ] && paths+=("$p")
+  done
+  [ "${#paths[@]}" -gt 0 ] || return 0
+  wiki_git add -A -- "${paths[@]}"
+}
+
 # 変更があれば 1 コミットを作る（メッセージ指定）。無変更なら no-op。git 無効なら何もしない。
 # 呼び出し側で acquire_write_lock を保持していること。
 wiki_git_commit() {
   git_enabled || return 0
   wiki_git_init
-  wiki_git add -A
+  wiki_git_add_scoped
   if wiki_git diff --cached --quiet; then return 0; fi
   wiki_git commit -q -m "$1"
 }
